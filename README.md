@@ -1,13 +1,16 @@
-# Log4J2 Appender for AWS Firehose
+# Log4J2 Appender for AWS Kinesis Stream & Firehose
 
 ## Configuration Options
+
+### Kinesis Firehose Appender
 ```
 <Appenders>
 	<Firehose name="firehose">
     	<PatternLayout pattern="%m%n" />
 		<DeliveryStreamName>YourFirehoseName</DeliveryStreamName>
-        <!-- optional, defaults to ap-northeast-1 -->
 		<Region>ap-northeast-1</Region>
+        <!-- optional, endpoint useful for VPC -->
+        <Endpoint>endpointUrl</Endpoint>
         <!-- optional, defaults to UTF-8 -->
         <Encoding>UTF-8</Encoding>
         <!-- optional, defaults to 3 -->
@@ -19,9 +22,29 @@
 	</Firehose>
 </Appenders>
 ```
+### Kinesis(Stream) Appender
+```
+<Appenders>
+	<Kinesis name="kinesis">
+    	<PatternLayout pattern="%m%n" />
+		<StreamName>YourKinesisStreamName</StreamName>
+		<Region>eu-west-1</Region>
+        <!-- optional, endpoint useful for VPC -->
+        <Endpoint>endpointUrl</Endpoint>
+        <!-- optional, defaults to UTF-8 -->
+        <Encoding>UTF-8</Encoding>
+        <!-- optional, defaults to 3 -->
+        <MaxRetries>3</MaxRetries>
+        <!-- optional, buffer size(KB), 5 ~ 1000, defaults to 1000 -->
+        <BufferSize>1000</BufferSize>
+        <!-- optional, max delay time(Min.), between every firehose-put calls, 1 ~ 60, defaults to 5 -->
+        <MaxPutRecordDelay>5</MaxPutRecordDelay>
+	</Kinesis>
+</Appenders>
+```
 ## NOTE
-* Messages from Logger will be buffered first, the appender makes a put request to Firehose only `BufferSize` or `MaxPutRecordDelay` is reached.
-* The maximum size of a record sent to Firehose is 1000 KB, if a single one message from Logger exceeds 1000 KB will be discarded. Not implementing an oversize message split to multiple records because I hope a message will not be dismantled when firehose write to S3.
+* Messages from Logger will be buffered first, the appender makes a put request to Kinesis only `BufferSize` or `MaxPutRecordDelay` is reached.
+* The maximum size of a record sent to Kinesis is 1000 KB, if a single one message from Logger exceeds 1000 KB will be discarded. Not implementing an oversize message split to multiple records because I hope a message will not be dismantled when firehose write to S3.
 * You may add the log4j-web module in web projects, see [https://logging.apache.org/log4j/2.x/manual/webapp.html]
 * If projects use log4j 1.2, you need Log4j 1.2 Bridge, see [https://logging.apache.org/log4j/2.x/log4j-1.2-api/index.html]
 * AWS-SDK runs `com.amazonaws.http.IdleConnectionReaper` in background, it doesn't shutdown automatically. Following code represents how a web project shutdown `IdleConnectionReaper` without add AWS-SDK jar to your deployment:
@@ -49,3 +72,9 @@ Just remove `@WebListener` annotation from above code and add a listener element
         <listener-class>CleanUpListener</listener-class>
 </listener>
 ```
+
+
+## License, work and origin
+
+Licensed under the Apache 2.0 License. See included LICENSE file. Original work by https://github.com/Minamoto54
+Modification by Robert Hjertmann Christiansen, also under the Apache 2.0 License. 
