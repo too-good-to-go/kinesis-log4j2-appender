@@ -42,6 +42,30 @@
 	</Kinesis>
 </Appenders>
 ```
+### Batch Kinesis(Stream) Appender
+
+Uploads each log line in a separate kinesis message that are batch produced together using PutRecords in the AWS Kinesis API.
+Note that BufferSize param here means number of separate messages.
+
+```
+<Appenders>
+    <BatchKinesis name="batch-kinesis">
+        <PatternLayout pattern="%m%n" />
+        <StreamName>YourKinesisStreamName</StreamName>
+        <Region>eu-west-1</Region>
+        <!-- optional, endpoint useful for VPC -->
+        <Endpoint>endpointUrl</Endpoint>
+        <!-- optional, defaults to UTF-8 -->
+        <Encoding>UTF-8</Encoding>
+        <!-- optional, defaults to 3 -->
+        <MaxRetries>3</MaxRetries>
+        <!-- optional, buffer size (no. of records(loglines)), 5 ~ 500, defaults to 100 -->
+        <BufferSize>200</BufferSize>
+        <!-- optional, max delay time(Min.), between every firehose-put calls, 1 ~ 60, defaults to 5 -->
+        <MaxPutRecordDelay>5</MaxPutRecordDelay>
+    </BatchKinesis>
+</Appenders>
+```
 ## NOTE
 * Messages from Logger will be buffered first, the appender makes a put request to Kinesis only `BufferSize` or `MaxPutRecordDelay` is reached.
 * The maximum size of a record sent to Kinesis is 1000 KB, if a single one message from Logger exceeds 1000 KB will be discarded. Not implementing an oversize message split to multiple records because I hope a message will not be dismantled when firehose write to S3.

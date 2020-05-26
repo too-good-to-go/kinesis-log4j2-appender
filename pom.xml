@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.hjertmann</groupId>
 	<artifactId>kinesis-log4j2-appender</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<name>Log4j2 Appender for pushing logs to Kinesis Streams and Firehose</name>
 	<url>https://github.com/hjertmann/kinesis-log4j2-appender</url>
 
