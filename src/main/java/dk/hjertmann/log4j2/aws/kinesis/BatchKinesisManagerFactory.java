@@ -39,11 +39,8 @@ import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.kinesis.AmazonKinesisAsync;
 import com.amazonaws.services.kinesis.AmazonKinesisAsyncClientBuilder;
-import com.amazonaws.services.kinesis.model.DescribeStreamRequest;
-import com.amazonaws.services.kinesis.model.DescribeStreamResult;
 import com.amazonaws.services.kinesis.model.PutRecordsRequest;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
-import com.amazonaws.services.kinesis.model.StreamStatus;
 import dk.hjertmann.log4j2.aws.kinesis.BatchKinesisManagerFactory.InitParameters;
 
 public class BatchKinesisManagerFactory implements ManagerFactory<WriterManager, InitParameters> {
@@ -113,14 +110,17 @@ public class BatchKinesisManagerFactory implements ManagerFactory<WriterManager,
         kinesisClient = configuration
             .build();
 
-        final DescribeStreamResult describeResult = kinesisClient.describeStream(
-            new DescribeStreamRequest().withStreamName(params.streamName));
-        final String streamStatus =
-            describeResult.getStreamDescription().getStreamStatus();
-        if (!StreamStatus.ACTIVE.name().equals(streamStatus)) {
-          throw new IllegalStateException("Stream " + params.streamName
-              + " is not ready (in active status) for appender: " + params.name);
-        }
+        // Can't do this check because we get rate-limit error from AWS after release when all our
+        // instances start up and do this check at the same time
+        //
+        // final DescribeStreamResult describeResult = kinesisClient.describeStream(
+        // new DescribeStreamRequest().withStreamName(params.streamName));
+        // final String streamStatus =
+        // describeResult.getStreamDescription().getStreamStatus();
+        // if (!StreamStatus.ACTIVE.name().equals(streamStatus)) {
+        // throw new IllegalStateException("Stream " + params.streamName
+        // + " is not ready (in active status) for appender: " + params.name);
+        // }
       } catch (final Exception e) {
         throw new IllegalStateException("Stream " + params.streamName
             + " doesn't exist for appender: " + params.name, e);
