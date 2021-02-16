@@ -38,9 +38,6 @@ import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsync;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsyncClientBuilder;
-import com.amazonaws.services.kinesisfirehose.model.DeliveryStreamStatus;
-import com.amazonaws.services.kinesisfirehose.model.DescribeDeliveryStreamRequest;
-import com.amazonaws.services.kinesisfirehose.model.DescribeDeliveryStreamResult;
 import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
 import com.amazonaws.services.kinesisfirehose.model.Record;
 import dk.hjertmann.log4j2.aws.kinesis.FirehoseManagerFactory.InitParameters;
@@ -109,14 +106,18 @@ public class FirehoseManagerFactory implements ManagerFactory<WriterManager, Ini
         firehoseClient = configuration
             .build();
 
-        final DescribeDeliveryStreamResult describeResult = firehoseClient.describeDeliveryStream(
-            new DescribeDeliveryStreamRequest().withDeliveryStreamName(params.deliveryStreamName));
-        final String streamStatus =
-            describeResult.getDeliveryStreamDescription().getDeliveryStreamStatus();
-        if (!DeliveryStreamStatus.ACTIVE.name().equals(streamStatus)) {
-          throw new IllegalStateException("DeliveryStream " + params.deliveryStreamName
-              + " is not ready (in active status) for appender: " + params.name);
-        }
+        // Can't do this check because we get rate-limit error from AWS after release when all our
+        // instances start up and do this check at the same time
+        //
+        // final DescribeDeliveryStreamResult describeResult =
+        // firehoseClient.describeDeliveryStream(
+        // new DescribeDeliveryStreamRequest().withDeliveryStreamName(params.deliveryStreamName));
+        // final String streamStatus =
+        // describeResult.getDeliveryStreamDescription().getDeliveryStreamStatus();
+        // if (!DeliveryStreamStatus.ACTIVE.name().equals(streamStatus)) {
+        // throw new IllegalStateException("DeliveryStream " + params.deliveryStreamName
+        // + " is not ready (in active status) for appender: " + params.name);
+        // }
       } catch (final Exception e) {
         throw new IllegalStateException("DeliveryStream " + params.deliveryStreamName
             + " doesn't exist for appender: " + params.name, e);
